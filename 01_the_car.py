@@ -1,6 +1,6 @@
 from gpiozero import Robot
 import time
-import sys, os
+import sys
 import tty, termios
 from ultrasound import UltraSound
 import RPi.GPIO as GPIO
@@ -10,12 +10,12 @@ import RPi.GPIO as GPIO
 def getchar():
     fd = sys.stdin.fileno()
     old_setting = termios.tcgetattr(fd)
-    ch=None
+    ch=0
     try:
         tty.setraw(sys.stdin.fileno())
         ch=sys.stdin.read(1)
     finally:
-        termios.tcsetattr(fd,termios.TCSANOW,old_setting)
+        termios.tcsetattr(fd, termios.TCSADRAIN,old_setting)
     return ch
 
 try:
@@ -25,21 +25,18 @@ try:
 
     while True:
         obstdistance = us.measure()
-        #print(obstdistance)
-        if obstdistance < 1.5:
-            robot.stop()
-        elif obstdistance < 15:
+        print(obstdistance)
+        if obstdistance < 15:
             speed=0.5
             robot.stop()
             robot.right(speed)
             time.sleep(0.01)
-            robot.reverse()
-            time.sleep(0.95)
+            robot.reverse(speed)
+            time.sleep(2)
             speed =1.0
             robot.forward(speed)
         
-        #key = getchar()
-        key="/"
+        key = getchar()
         if key == "w":
             robot.stop()
             time.sleep(0.01)
@@ -61,12 +58,10 @@ try:
         elif key == "q": # q key for quit  
             break
         else:
-            #print(key)
-            pass
+            print(key)
             
     
 finally:
     # Reset GPIO settings
-    #GPIO.cleanup()
-    pass
+    GPIO.cleanup()
 
